@@ -22,6 +22,8 @@ Mahasiswa mampu mendesain endpoint REST API.
 
 Dokumen desain endpoint REST API.
 
+Contoh hasil praktik tersedia di [docs/hasil/pertemuan-03.md](../hasil/pertemuan-03.md).
+
 ## Tag
 
 ```bash
