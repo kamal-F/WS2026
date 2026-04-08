@@ -40,6 +40,11 @@ Tujuan:
 - melihat response resource collection,
 - melihat bentuk response JSON.
 
+Catatan:
+
+- jika server sudah pernah dipakai untuk `POST`, jumlah data pada `GET /api/v1/books` bisa lebih dari satu,
+- untuk hasil yang bersih, restart server lalu ulangi pengujian.
+
 ### 3. POST buku baru
 
 ```bash
@@ -59,6 +64,13 @@ Hasil yang diharapkan:
 
 - status `201 Created`,
 - body response JSON berisi data buku baru.
+
+Hasil uji terminal:
+
+```text
+STATUS:201
+{"data":{"id":"535d2d06-716b-4baf-ab0b-94a24166da63","title":"REST API Dasar","author":"Kamal","year":2026,"createdAt":"2026-04-08T23:48:24.160Z"}}
+```
 
 ### 4. POST invalid
 
@@ -83,6 +95,13 @@ Contoh response:
     "message": "Body request tidak valid"
   }
 }
+```
+
+Hasil uji terminal:
+
+```text
+STATUS:400
+{"error":{"code":"VALIDATION_ERROR","message":"Body request tidak valid","issues":{"title":["String must contain at least 3 character(s)"],"author":["String must contain at least 3 character(s)"],"year":["Number must be greater than or equal to 1900"]}}}
 ```
 
 ### 5. POST malformed JSON
@@ -110,6 +129,13 @@ Contoh response:
 }
 ```
 
+Hasil uji terminal:
+
+```text
+STATUS:400
+{"error":{"code":"INVALID_JSON","message":"Body request harus berupa JSON yang valid"}}
+```
+
 ### 6. GET resource yang tidak ada
 
 ```bash
@@ -120,6 +146,13 @@ Tujuan:
 
 - memahami perbedaan antara route valid dan resource tidak ditemukan,
 - melihat status code `404 Not Found`.
+
+Hasil uji terminal:
+
+```text
+STATUS:404
+{"error":{"code":"BOOK_NOT_FOUND","message":"Buku tidak ditemukan"}}
+```
 
 ### 7. PUT update buku
 
@@ -137,6 +170,13 @@ Tujuan:
 - memahami update resource,
 - melihat penggunaan method `PUT`.
 
+Hasil uji terminal:
+
+```text
+STATUS:200
+{"data":{"id":"535d2d06-716b-4baf-ab0b-94a24166da63","title":"REST API Lanjut","author":"Kamal","year":2026,"createdAt":"2026-04-08T23:48:24.160Z"}}
+```
+
 ### 8. DELETE buku
 
 Gunakan `id` hasil dari `POST`.
@@ -150,6 +190,13 @@ Tujuan:
 - memahami penghapusan resource,
 - melihat status code `204 No Content`.
 
+Hasil uji terminal:
+
+```text
+STATUS:204
+<body kosong>
+```
+
 ### 9. Route yang tidak ada
 
 ```bash
@@ -160,6 +207,13 @@ Tujuan:
 
 - melihat perbedaan route tidak ditemukan dengan resource tidak ditemukan,
 - memahami response error global.
+
+Hasil uji terminal:
+
+```text
+STATUS:404
+{"error":{"code":"NOT_FOUND","message":"Route GET /api/v1/unknown tidak ditemukan"}}
+```
 
 ## Tabel Hasil Pengamatan
 
