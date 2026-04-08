@@ -22,6 +22,8 @@ Mahasiswa memahami prinsip REST secara benar.
 
 Tabel eksperimen HTTP method dan status code.
 
+Contoh hasil praktik tersedia di [docs/hasil/pertemuan-02.md](../hasil/pertemuan-02.md).
+
 ## Tag
 
 ```bash

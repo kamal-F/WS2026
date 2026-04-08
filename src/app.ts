@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
+import type { NextFunction, Request, Response } from "express";
 import { booksRouter } from "./routes/books.js";
 import { healthRouter } from "./routes/health.js";
 
@@ -14,6 +15,19 @@ app.use(morgan("dev"));
 
 app.use("/health", healthRouter);
 app.use("/api/v1/books", booksRouter);
+
+app.use((error: Error, _req: Request, res: Response, next: NextFunction) => {
+  if (error instanceof SyntaxError && "body" in error) {
+    return res.status(400).json({
+      error: {
+        code: "INVALID_JSON",
+        message: "Body request harus berupa JSON yang valid"
+      }
+    });
+  }
+
+  return next(error);
+});
 
 app.use((req, res) => {
   res.status(404).json({
