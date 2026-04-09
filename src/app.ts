@@ -3,6 +3,7 @@ import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 import type { NextFunction, Request, Response } from "express";
+import { authRouter } from "./routes/auth.js";
 import { booksRouter } from "./routes/books.js";
 import { healthRouter } from "./routes/health.js";
 import { openApiRouter } from "./routes/openapi.js";
@@ -29,6 +30,7 @@ app.use(morgan("dev"));
 
 app.use("/health", healthRouter);
 app.use("/", openApiRouter);
+app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/books", booksRouter);
 app.use("/soap", soapRouter);
 

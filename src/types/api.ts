@@ -10,6 +10,10 @@ export type SuccessBody<T> = {
   data: T;
 };
 
+export type MessageBody = {
+  message: string;
+};
+
 export type PaginatedBody<T> = {
   data: T[];
   meta: {

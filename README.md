@@ -40,6 +40,7 @@ npm run dev
 Endpoint awal:
 
 - `GET /health`
+- `POST /api/v1/auth/login`
 - `GET /api/v1/books`
 - `POST /api/v1/books`
 - `GET /api/v1/books/:id`
@@ -75,6 +76,12 @@ Menjalankan test:
 
 ```bash
 npm test
+```
+
+Demo login:
+
+```bash
+curl.exe -X POST http://localhost:3000/api/v1/auth/login -H "Content-Type: application/json" -d "{\"email\":\"admin@ws2026.local\",\"password\":\"secret123\"}"
 ```
 
 ## Struktur

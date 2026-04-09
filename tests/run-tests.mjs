@@ -56,10 +56,24 @@ try {
   });
 
   await run("create book", async () => {
-    const response = await fetch(`${baseUrl}/api/v1/books`, {
+    const loginResponse = await fetch(`${baseUrl}/api/v1/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: "admin@ws2026.local",
+        password: "secret123"
+      })
+    });
+
+    const loginBody = await loginResponse.json();
+
+    const response = await fetch(`${baseUrl}/api/v1/books`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${loginBody.data.accessToken}`
       },
       body: JSON.stringify({
         title: "Testing API",
@@ -70,15 +84,49 @@ try {
 
     const body = await response.json();
 
+    assert.equal(loginResponse.status, 200);
     assert.equal(response.status, 201);
     assert.equal(body.data.title, "Testing API");
   });
 
-  await run("validation failure", async () => {
+  await run("reject create tanpa auth", async () => {
     const response = await fetch(`${baseUrl}/api/v1/books`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        title: "Tanpa Auth",
+        author: "Kamal",
+        year: 2026
+      })
+    });
+
+    const body = await response.json();
+
+    assert.equal(response.status, 401);
+    assert.equal(body.error.code, "UNAUTHORIZED");
+  });
+
+  await run("validation failure", async () => {
+    const loginResponse = await fetch(`${baseUrl}/api/v1/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: "admin@ws2026.local",
+        password: "secret123"
+      })
+    });
+
+    const loginBody = await loginResponse.json();
+
+    const response = await fetch(`${baseUrl}/api/v1/books`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${loginBody.data.accessToken}`
       },
       body: JSON.stringify({
         title: "No",
@@ -89,8 +137,29 @@ try {
 
     const body = await response.json();
 
+    assert.equal(loginResponse.status, 200);
     assert.equal(response.status, 400);
     assert.equal(body.error.code, "VALIDATION_ERROR");
+  });
+
+  await run("api key dapat dipakai untuk create", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/books`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "ws2026-api-key"
+      },
+      body: JSON.stringify({
+        title: "API Key Book",
+        author: "Kamal",
+        year: 2026
+      })
+    });
+
+    const body = await response.json();
+
+    assert.equal(response.status, 201);
+    assert.equal(body.data.title, "API Key Book");
   });
 
   await run("openapi yaml", async () => {

@@ -6,11 +6,12 @@ import {
   listBooks,
   updateBook
 } from "../controllers/books.js";
+import { requireAuth } from "../middleware/auth.js";
 
 export const booksRouter = Router();
 
 booksRouter.get("/", listBooks);
-booksRouter.post("/", createBook);
+booksRouter.post("/", requireAuth, createBook);
 booksRouter.get("/:id", getBookById);
-booksRouter.put("/:id", updateBook);
-booksRouter.delete("/:id", deleteBook);
+booksRouter.put("/:id", requireAuth, updateBook);
+booksRouter.delete("/:id", requireAuth, deleteBook);
