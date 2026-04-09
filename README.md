@@ -45,8 +45,17 @@ Endpoint awal:
 - `GET /api/v1/books/:id`
 - `PUT /api/v1/books/:id`
 - `DELETE /api/v1/books/:id`
+- `GET /soap/book-service?wsdl`
+- `POST /soap/book-service`
 
 Artefak contoh SOAP/WSDL untuk pertemuan 7 tersedia di `examples/soap/`.
+
+Contoh test SOAP:
+
+```bash
+curl.exe http://localhost:3000/soap/book-service?wsdl
+curl.exe -X POST http://localhost:3000/soap/book-service -H "Content-Type: text/xml" --data-binary "@examples/soap/requests/get-book-request.xml"
+```
 
 ## Struktur
 

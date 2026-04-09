@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope
+  xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:bk="http://ws2026.example.com/book-service">
+  <soapenv:Header />
+  <soapenv:Body>
+    <bk:GetBookRequest>
+      <bk:bookId>book-999</bk:bookId>
+    </bk:GetBookRequest>
+  </soapenv:Body>
+</soapenv:Envelope>

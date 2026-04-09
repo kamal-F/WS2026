@@ -5,6 +5,7 @@ import morgan from "morgan";
 import type { NextFunction, Request, Response } from "express";
 import { booksRouter } from "./routes/books.js";
 import { healthRouter } from "./routes/health.js";
+import { soapRouter } from "./routes/soap.js";
 
 export const app = express();
 
@@ -15,6 +16,7 @@ app.use(morgan("dev"));
 
 app.use("/health", healthRouter);
 app.use("/api/v1/books", booksRouter);
+app.use("/soap", soapRouter);
 
 app.use((error: Error, _req: Request, res: Response, next: NextFunction) => {
   if (error instanceof SyntaxError && "body" in error) {
