@@ -15,12 +15,7 @@ const swaggerHtml = `<!DOCTYPE html>
   <body>
     <div id="swagger-ui"></div>
     <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
-    <script>
-      window.ui = SwaggerUIBundle({
-        url: "/openapi.yaml",
-        dom_id: "#swagger-ui"
-      });
-    </script>
+    <script src="/docs/swagger-init.js"></script>
   </body>
 </html>`;
 
@@ -35,4 +30,12 @@ openApiRouter.get("/openapi.yaml", (_req, res) => {
 openApiRouter.get("/docs", (_req, res) => {
   res.type("text/html");
   return res.send(swaggerHtml);
+});
+
+openApiRouter.get("/docs/swagger-init.js", (_req, res) => {
+  res.type("application/javascript");
+  return res.send(`window.ui = SwaggerUIBundle({
+  url: "/openapi.yaml",
+  dom_id: "#swagger-ui"
+});`);
 });

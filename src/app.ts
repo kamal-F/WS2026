@@ -10,7 +10,19 @@ import { soapRouter } from "./routes/soap.js";
 
 export const app = express();
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "https://unpkg.com", "'unsafe-inline'"],
+        scriptSrc: ["'self'", "https://unpkg.com"],
+        imgSrc: ["'self'", "data:"],
+        connectSrc: ["'self'"]
+      }
+    }
+  })
+);
 app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
