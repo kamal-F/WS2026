@@ -46,9 +46,13 @@ Endpoint awal:
 - `PUT /api/v1/books/:id`
 - `DELETE /api/v1/books/:id`
 
+Artefak contoh SOAP/WSDL untuk pertemuan 7 tersedia di `examples/soap/`.
+
 ## Struktur
 
 ```text
+examples/
+  soap/             Demo WSDL dan SOAP message
 src/
   app.ts            Konfigurasi Express
   server.ts         Entry point

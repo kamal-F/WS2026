@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope
+  xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:bk="http://ws2026.example.com/book-service">
+  <soapenv:Header />
+  <soapenv:Body>
+    <bk:GetBookResponse>
+      <bk:id>book-001</bk:id>
+      <bk:title>Web Service Fundamentals</bk:title>
+      <bk:author>WS2026 Team</bk:author>
+      <bk:year>2026</bk:year>
+    </bk:GetBookResponse>
+  </soapenv:Body>
+</soapenv:Envelope>
