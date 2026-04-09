@@ -141,3 +141,5 @@ vite.config.ts.timestamp-*
 # Local course source material
 docs/
 mini rps.pdf
+data/
+*.db

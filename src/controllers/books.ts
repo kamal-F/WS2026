@@ -1,7 +1,14 @@
 import { randomUUID } from "node:crypto";
 import type { Request, Response } from "express";
 import { bookInputSchema, type BookInput } from "../schemas/book.js";
-import { books, type Book } from "../store/books.js";
+import type { Book } from "../store/books.js";
+import {
+  createBookInDatabase,
+  deleteBookFromDatabase,
+  findBookById,
+  listBooksFromDatabase,
+  updateBookInDatabase
+} from "../services/books.js";
 import type { ErrorBody, PaginatedBody, SuccessBody } from "../types/api.js";
 
 type BookParams = {
@@ -44,15 +51,14 @@ export const listBooks = (
 ) => {
   const page = Number(req.query.page ?? 1);
   const limit = Number(req.query.limit ?? 10);
-  const start = (page - 1) * limit;
-  const data = books.slice(start, start + limit);
+  const result = listBooksFromDatabase(page, limit);
 
   return res.json({
-    data,
+    data: result.data,
     meta: {
       page,
       limit,
-      total: books.length
+      total: result.total
     }
   });
 };
@@ -73,16 +79,14 @@ export const createBook = (
     createdAt: new Date().toISOString()
   };
 
-  books.push(book);
-
-  return res.status(201).json({ data: book });
+  return res.status(201).json({ data: createBookInDatabase(book) });
 };
 
 export const getBookById = (
   req: Request<BookParams, SuccessBody<Book> | ErrorBody>,
   res: Response<SuccessBody<Book> | ErrorBody>
 ) => {
-  const book = books.find((item) => item.id === req.params.id);
+  const book = findBookById(req.params.id);
 
   if (!book) {
     return notFound(res);
@@ -101,31 +105,24 @@ export const updateBook = (
     return validationError(res, parsed.error.flatten().fieldErrors);
   }
 
-  const index = books.findIndex((item) => item.id === req.params.id);
+  const updated = updateBookInDatabase(req.params.id, parsed.data);
 
-  if (index === -1) {
+  if (!updated) {
     return notFound(res);
   }
 
-  books[index] = {
-    ...books[index],
-    ...parsed.data
-  };
-
-  return res.json({ data: books[index] });
+  return res.json({ data: updated });
 };
 
 export const deleteBook = (
   req: Request<BookParams, undefined | ErrorBody>,
   res: Response<undefined | ErrorBody>
 ) => {
-  const index = books.findIndex((item) => item.id === req.params.id);
+  const deleted = deleteBookFromDatabase(req.params.id);
 
-  if (index === -1) {
+  if (!deleted) {
     return notFound(res);
   }
-
-  books.splice(index, 1);
 
   return res.status(204).send();
 };
