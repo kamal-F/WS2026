@@ -21,6 +21,8 @@ API skeleton berjalan.
 
 API skeleton Express + TypeScript berjalan.
 
+Contoh hasil praktik tersedia di [docs/hasil/pertemuan-04.md](../hasil/pertemuan-04.md).
+
 ## Tag
 
 ```bash
