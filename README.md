@@ -30,8 +30,6 @@ Pertemuan 8 dan 16 dikecualikan dari tag praktik karena berisi UTS dan UAS/proye
 | 14 | Kafka & Event Streaming | Simulasi event log dan replay | `pertemuan-14` |
 | 15 | Integrasi Arsitektur Web Service Modern | Rancang REST + MQ + gRPC + gateway | `pertemuan-15` |
 
-Lihat detail praktik di folder [docs/pertemuan](docs/pertemuan).
-
 ## Menjalankan Project
 
 ```bash
@@ -51,9 +49,6 @@ Endpoint awal:
 ## Struktur
 
 ```text
-docs/
-  pertemuan/        Panduan praktik per pertemuan
-  tagging.md        Strategi commit dan tag Git
 src/
   app.ts            Konfigurasi Express
   server.ts         Entry point
@@ -77,4 +72,4 @@ git push -u origin main
 git push origin --tags
 ```
 
-Panduan tag ada di [docs/tagging.md](docs/tagging.md).
+Materi RPS, catatan praktik, dan dokumen kerja disimpan lokal dan tidak ikut dipublikasikan ke GitHub.
