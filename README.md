@@ -46,6 +46,7 @@ Endpoint awal:
 - `PUT /api/v1/books/:id`
 - `DELETE /api/v1/books/:id`
 - `GET /openapi.yaml`
+- `GET /docs`
 - `GET /soap/book-service?wsdl`
 - `POST /soap/book-service`
 
@@ -62,6 +63,12 @@ Dokumentasi OpenAPI:
 
 ```bash
 curl.exe http://localhost:3000/openapi.yaml
+```
+
+Swagger UI:
+
+```bash
+start http://localhost:3000/docs
 ```
 
 Menjalankan test:
