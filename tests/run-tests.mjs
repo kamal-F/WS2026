@@ -1,0 +1,117 @@
+import assert from "node:assert/strict";
+
+process.env.DATABASE_PATH = "tmp/ws2026-test.db";
+
+const { app } = await import("../dist/app.js");
+const { db, initializeDatabase, seedBooks } = await import("../dist/db/database.js");
+
+initializeDatabase();
+
+const server = app.listen(0);
+
+await new Promise((resolve) => {
+  server.once("listening", resolve);
+});
+
+const address = server.address();
+
+if (!address || typeof address === "string") {
+  throw new Error("Server test gagal mendapatkan port");
+}
+
+const baseUrl = `http://127.0.0.1:${address.port}`;
+
+const resetBooks = () => {
+  db.exec("DELETE FROM books");
+  seedBooks();
+};
+
+const run = async (name, fn) => {
+  try {
+    resetBooks();
+    await fn();
+    console.log(`PASS ${name}`);
+  } catch (error) {
+    console.error(`FAIL ${name}`);
+    throw error;
+  }
+};
+
+try {
+  await run("health check", async () => {
+    const response = await fetch(`${baseUrl}/health`);
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.status, "ok");
+  });
+
+  await run("list books", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/books`);
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.meta.total, 1);
+    assert.equal(body.data[0].id, "book-001");
+  });
+
+  await run("create book", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/books`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        title: "Testing API",
+        author: "Kamal",
+        year: 2026
+      })
+    });
+
+    const body = await response.json();
+
+    assert.equal(response.status, 201);
+    assert.equal(body.data.title, "Testing API");
+  });
+
+  await run("validation failure", async () => {
+    const response = await fetch(`${baseUrl}/api/v1/books`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        title: "No",
+        author: "AB",
+        year: 1800
+      })
+    });
+
+    const body = await response.json();
+
+    assert.equal(response.status, 400);
+    assert.equal(body.error.code, "VALIDATION_ERROR");
+  });
+
+  await run("openapi yaml", async () => {
+    const response = await fetch(`${baseUrl}/openapi.yaml`);
+    const body = await response.text();
+
+    assert.equal(response.status, 200);
+    assert.match(body, /openapi: 3.0.3/);
+    assert.match(body, /\/api\/v1\/books:/);
+  });
+
+  console.log("All API tests passed");
+} finally {
+  await new Promise((resolve, reject) => {
+    server.close((error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      resolve();
+    });
+  });
+}

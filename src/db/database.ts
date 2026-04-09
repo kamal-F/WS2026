@@ -2,7 +2,9 @@ import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
-const databasePath = resolve(process.cwd(), "data", "ws2026.db");
+const databasePath = process.env.DATABASE_PATH
+  ? resolve(process.cwd(), process.env.DATABASE_PATH)
+  : resolve(process.cwd(), "data", "ws2026.db");
 
 mkdirSync(dirname(databasePath), { recursive: true });
 
@@ -24,17 +26,21 @@ export const initializeDatabase = () => {
     .get() as { total: number };
 
   if (countRow.total === 0) {
-    db.prepare(
-      `
-        INSERT INTO books (id, title, author, year, created_at)
-        VALUES (?, ?, ?, ?, ?)
-      `
-    ).run(
-      "book-001",
-      "Web Service Fundamentals",
-      "WS2026 Team",
-      2026,
-      new Date().toISOString()
-    );
+    seedBooks();
   }
+};
+
+export const seedBooks = () => {
+  db.prepare(
+    `
+      INSERT INTO books (id, title, author, year, created_at)
+      VALUES (?, ?, ?, ?, ?)
+    `
+  ).run(
+    "book-001",
+    "Web Service Fundamentals",
+    "WS2026 Team",
+    2026,
+    new Date().toISOString()
+  );
 };

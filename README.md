@@ -45,6 +45,7 @@ Endpoint awal:
 - `GET /api/v1/books/:id`
 - `PUT /api/v1/books/:id`
 - `DELETE /api/v1/books/:id`
+- `GET /openapi.yaml`
 - `GET /soap/book-service?wsdl`
 - `POST /soap/book-service`
 
@@ -55,6 +56,18 @@ Contoh test SOAP:
 ```bash
 curl.exe http://localhost:3000/soap/book-service?wsdl
 curl.exe -X POST http://localhost:3000/soap/book-service -H "Content-Type: text/xml" --data-binary "@examples/soap/requests/get-book-request.xml"
+```
+
+Dokumentasi OpenAPI:
+
+```bash
+curl.exe http://localhost:3000/openapi.yaml
+```
+
+Menjalankan test:
+
+```bash
+npm test
 ```
 
 ## Struktur
