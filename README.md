@@ -1,34 +1,33 @@
 # Tutorial Praktik Web Service
 
-Repo ini berisi bahan praktik Web Service berdasarkan `mini rps.pdf`, dengan stack utama Node.js, Express, dan TypeScript.
+Repo ini berisi bahan praktik Web Service versi 2026, dengan stack utama Node.js, Express, dan TypeScript.
 
 Fokus repo:
 
 - praktik bertahap untuk setiap pertemuan non-ujian,
 - REST API sebagai jalur praktik utama,
-- pengenalan SOAP, microservice, RabbitMQ, gRPC, event streaming, dan integrasi arsitektur modern,
-- dokumentasi progres materi dan praktik per pertemuan untuk repo GitHub `https://github.com/kamal-F/WS2026`.
+- pengenalan SOAP, microservice, RabbitMQ, gRPC, event streaming, dan integrasi arsitektur modern.
 
 ## Urutan Pertemuan
 
 Pertemuan 8 dan 16 tidak dimasukkan ke alur praktik rutin karena berisi UTS dan UAS/proyek.
 
-| Pertemuan | Topik | Praktik | Penanda Progres |
-|---:|---|---|---|
-| 1 | Pengantar Web Service & Sistem Terdistribusi | Peta client-server dan jenis komunikasi | `pertemuan-01` |
-| 2 | HTTP & RESTful Principles | Eksperimen HTTP method dan status code | `pertemuan-02` |
-| 3 | REST API Design | Desain resource, URI, error, pagination | `pertemuan-03` |
-| 4 | Node.js, Express, TypeScript | Setup API skeleton | `pertemuan-04` |
-| 5 | Implementasi REST API CRUD | CRUD endpoint | `pertemuan-05` |
-| 6 | REST API + Database | Hubungkan API ke database | `pertemuan-06` |
-| 7 | SOAP Web Service & WSDL | Membaca WSDL dan contoh SOAP message | `pertemuan-07` |
-| 9 | API Testing & Documentation | OpenAPI dan testing endpoint | `pertemuan-09` |
-| 10 | Authentication & Security Dasar | JWT auth, API key, CORS/rate limit konsep | `pertemuan-10` |
-| 11 | Pengantar Microservice Architecture | Breakdown monolith, service boundary, dan data ownership | `pertemuan-11` |
-| 12 | Message Queue dengan RabbitMQ | Asynchronous communication, producer-consumer, publish-consume event | `pertemuan-12` |
-| 13 | RPC & gRPC | REST vs RPC, `.proto`, dan gRPC service communication | `pertemuan-13` |
-| 14 | Event Streaming | Event log, replay, dan streaming architecture | `pertemuan-14` |
-| 15 | Integrasi Arsitektur Web Service Modern | REST + MQ, REST + gRPC, API Gateway, observability | `pertemuan-15` |
+| Pertemuan | Topik | Praktik |
+|---:|---|---|
+| 1 | Pengantar Web Service & Sistem Terdistribusi | Peta client-server dan jenis komunikasi |
+| 2 | HTTP & RESTful Principles | Eksperimen HTTP method dan status code |
+| 3 | REST API Design | Desain resource, URI, error, pagination |
+| 4 | Node.js, Express, TypeScript | Setup API skeleton |
+| 5 | Implementasi REST API CRUD | CRUD endpoint |
+| 6 | REST API + Database | Hubungkan API ke database |
+| 7 | SOAP Web Service & WSDL | Membaca WSDL dan contoh SOAP message |
+| 9 | API Testing & Documentation | OpenAPI dan testing endpoint |
+| 10 | Authentication & Security Dasar | JWT auth, API key, CORS/rate limit konsep |
+| 11 | Pengantar Microservice Architecture | Breakdown monolith, service boundary, dan data ownership |
+| 12 | Message Queue dengan RabbitMQ | Asynchronous communication, producer-consumer, publish-consume event |
+| 13 | RPC & gRPC | REST vs RPC, `.proto`, dan gRPC service communication |
+| 14 | Event Streaming | Event log, replay, dan streaming architecture |
+| 15 | Integrasi Arsitektur Web Service Modern | REST + MQ, REST + gRPC, API Gateway, observability |
 
 ## Menjalankan Project
 
