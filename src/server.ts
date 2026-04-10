@@ -1,9 +1,14 @@
 import { config } from "dotenv";
-import { app } from "./app.js";
 import { initializeDatabase } from "./db/database.js";
+import { initializeMessageBroker } from "./services/message-broker.js";
+import { initializeNotificationConsumer } from "./services/notification-service.js";
 
 config();
 initializeDatabase();
+initializeMessageBroker();
+initializeNotificationConsumer();
+
+const { app } = await import("./app.js");
 
 const port = Number(process.env.PORT ?? 3000);
 

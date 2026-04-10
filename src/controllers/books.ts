@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { Request, Response } from "express";
 import { bookInputSchema, type BookInput } from "../schemas/book.js";
 import type { Book } from "../store/books.js";
+import { publishBookCreatedEvent } from "../services/catalog-service.js";
 import {
   createBookInDatabase,
   deleteBookFromDatabase,
@@ -63,7 +64,7 @@ export const listBooks = (
   });
 };
 
-export const createBook = (
+export const createBook = async (
   req: Request<Record<string, never>, SuccessBody<Book> | ErrorBody, BookInput>,
   res: Response<SuccessBody<Book> | ErrorBody>
 ) => {
@@ -79,7 +80,11 @@ export const createBook = (
     createdAt: new Date().toISOString()
   };
 
-  return res.status(201).json({ data: createBookInDatabase(book) });
+  const createdBook = createBookInDatabase(book);
+
+  await publishBookCreatedEvent(createdBook, req.auth?.email ?? "anonymous");
+
+  return res.status(201).json({ data: createdBook });
 };
 
 export const getBookById = (

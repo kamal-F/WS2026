@@ -242,6 +242,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CatalogStatsResponse"
+  /services/events/health:
+    get:
+      summary: Health check untuk message broker
+      responses:
+        "200":
+          description: Status broker event
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageBrokerHealthResponse"
   /services/catalog/books:
     get:
       summary: Ambil daftar buku dari catalog service
@@ -365,6 +375,26 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /services/notifications/health:
+    get:
+      summary: Health check untuk notification service
+      responses:
+        "200":
+          description: Notification service berjalan normal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceHealth"
+  /services/notifications/events:
+    get:
+      summary: Lihat event yang sudah dikonsumsi notification service
+      responses:
+        "200":
+          description: Daftar event yang sudah diproses consumer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationEventListResponse"
 components:
   securitySchemes:
     bearerAuth:
@@ -554,16 +584,85 @@ components:
                   $ref: "#/components/schemas/ServiceHealth"
                 catalogHealth:
                   $ref: "#/components/schemas/ServiceHealth"
+                notificationHealth:
+                  $ref: "#/components/schemas/ServiceHealth"
+                messageBroker:
+                  $ref: "#/components/schemas/MessageBrokerHealth"
               required:
                 - catalogStats
                 - identityHealth
                 - catalogHealth
+                - notificationHealth
+                - messageBroker
           required:
             - style
             - gateway
             - services
             - dataFlow
             - currentState
+      required:
+        - data
+    MessageBrokerHealth:
+      type: object
+      properties:
+        status:
+          type: string
+        transport:
+          type: string
+          example: rabbitmq
+        queueName:
+          type: string
+        subscribers:
+          type: integer
+        pendingJobs:
+          type: integer
+        lastError:
+          nullable: true
+          type: string
+      required:
+        - status
+        - transport
+        - queueName
+        - subscribers
+        - pendingJobs
+        - lastError
+    MessageBrokerHealthResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/MessageBrokerHealth"
+      required:
+        - data
+    NotificationEvent:
+      type: object
+      properties:
+        id:
+          type: string
+        eventType:
+          type: string
+        source:
+          type: string
+        handledBy:
+          type: string
+        receivedAt:
+          type: string
+          format: date-time
+        payloadSummary:
+          type: string
+      required:
+        - id
+        - eventType
+        - source
+        - handledBy
+        - receivedAt
+        - payloadSummary
+    NotificationEventListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/NotificationEvent"
       required:
         - data
     LoginInput:

@@ -7,6 +7,7 @@ import { architectureRouter } from "./routes/architecture.js";
 import { authRouter } from "./routes/auth.js";
 import { booksRouter } from "./routes/books.js";
 import { catalogServiceRouter } from "./routes/catalog-service.js";
+import { eventsRouter, notificationsRouter } from "./routes/events.js";
 import { healthRouter } from "./routes/health.js";
 import { identityServiceRouter } from "./routes/identity-service.js";
 import { openApiRouter } from "./routes/openapi.js";
@@ -36,8 +37,10 @@ app.use("/", openApiRouter);
 app.use("/architecture", architectureRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/books", booksRouter);
+app.use("/services/events", eventsRouter);
 app.use("/services/identity", identityServiceRouter);
 app.use("/services/catalog", catalogServiceRouter);
+app.use("/services/notifications", notificationsRouter);
 app.use("/soap", soapRouter);
 
 app.use((error: Error, _req: Request, res: Response, next: NextFunction) => {

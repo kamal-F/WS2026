@@ -1,4 +1,6 @@
 import { db } from "../db/database.js";
+import type { Book } from "../store/books.js";
+import { publishDomainEvent } from "./message-broker.js";
 
 export const getCatalogServiceHealth = () => {
   return {
@@ -57,6 +59,19 @@ export const getCatalogServiceDescriptor = () => {
       "Menyediakan statistik katalog",
       "Menjadi kandidat service terpisah untuk database buku"
     ],
-    integrations: ["API Gateway", "SQLite database"]
+    integrations: ["API Gateway", "SQLite database", "Message broker producer"]
   };
+};
+
+export const publishBookCreatedEvent = async (
+  book: Book,
+  triggeredBy: string
+) => {
+  return publishDomainEvent("book.created", "catalog-service", {
+    bookId: book.id,
+    title: book.title,
+    author: book.author,
+    year: book.year,
+    triggeredBy
+  });
 };

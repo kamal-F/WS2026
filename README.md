@@ -52,6 +52,9 @@ Endpoint awal:
 - `GET /services/catalog/health`
 - `GET /services/catalog/stats`
 - `GET /services/catalog/books`
+- `GET /services/events/health`
+- `GET /services/notifications/health`
+- `GET /services/notifications/events`
 - `GET /openapi.yaml`
 - `GET /docs`
 - `GET /soap/book-service?wsdl`
@@ -115,6 +118,36 @@ Repo sekarang masuk tahap `microservice-ready modular monolith`:
 - `data ownership` mulai dipisahkan per domain layanan
 - `API gateway` tetap ada di jalur `/api/v1/*`
 - endpoint `/architecture/services` dipakai untuk melihat boundary service yang sudah dipisah
+
+## Pertemuan 12
+
+Repo sekarang ditambah alur event-driven sederhana:
+
+- `catalog-service` menjadi producer event `book.created`
+- message broker memakai `RabbitMQ` bila `RABBITMQ_URL` tersedia
+- fallback `in-memory broker` tetap disediakan untuk test dan demo lokal tanpa RabbitMQ
+- `notification-service` menjadi consumer yang menerima event secara asynchronous
+- endpoint observasi event tersedia di `/services/events/health` dan `/services/notifications/events`
+
+Setup RabbitMQ lokal paling cepat:
+
+```powershell
+docker run -d --hostname ws2026-rabbit --name ws2026-rabbit `
+  -p 5672:5672 -p 15672:15672 `
+  rabbitmq:3-management
+```
+
+Verifikasi broker:
+
+```powershell
+Test-NetConnection localhost -Port 5672
+curl.exe http://localhost:3000/services/events/health
+```
+
+Target hasil saat RabbitMQ benar-benar dipakai aplikasi:
+
+- `TcpTestSucceeded : True`
+- `/services/events/health` mengembalikan `transport: "rabbitmq"` dan `status: "connected"`
 
 ## Remote GitHub
 

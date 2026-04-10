@@ -4,10 +4,15 @@ import {
   getCatalogServiceHealth,
   getCatalogServiceStats
 } from "../services/catalog-service.js";
+import { getMessageBrokerHealth } from "../services/message-broker.js";
 import {
   getIdentityServiceDescriptor,
   getIdentityServiceHealth
 } from "../services/identity-service.js";
+import {
+  getNotificationServiceDescriptor,
+  getNotificationServiceHealth
+} from "../services/notification-service.js";
 import type { SuccessBody } from "../types/api.js";
 
 type ServiceOverview = {
@@ -31,6 +36,8 @@ type ArchitectureOverview = {
     catalogStats: ReturnType<typeof getCatalogServiceStats>;
     identityHealth: ReturnType<typeof getIdentityServiceHealth>;
     catalogHealth: ReturnType<typeof getCatalogServiceHealth>;
+    notificationHealth: ReturnType<typeof getNotificationServiceHealth>;
+    messageBroker: ReturnType<typeof getMessageBrokerHealth>;
   };
 };
 
@@ -47,18 +54,23 @@ export const getArchitectureOverview = (
       },
       services: [
         getIdentityServiceDescriptor(),
-        getCatalogServiceDescriptor()
+        getCatalogServiceDescriptor(),
+        getNotificationServiceDescriptor()
       ],
       dataFlow: [
         "Client mengakses gateway pada path /api/v1/*",
         "Gateway meneruskan request ke boundary identity atau catalog",
-        "Catalog service mengelola data buku dan statistik katalog",
+        "Catalog service mengelola data buku dan mem-publish event book.created",
+        "Message broker meneruskan event ke consumer",
+        "Notification service mengonsumsi event book.created secara asynchronous",
         "Identity service menangani login, token, dan validasi kredensial"
       ],
       currentState: {
         catalogStats: getCatalogServiceStats(),
         identityHealth: getIdentityServiceHealth(),
-        catalogHealth: getCatalogServiceHealth()
+        catalogHealth: getCatalogServiceHealth(),
+        notificationHealth: getNotificationServiceHealth(),
+        messageBroker: getMessageBrokerHealth()
       }
     }
   });

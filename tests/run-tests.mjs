@@ -1,11 +1,21 @@
 import assert from "node:assert/strict";
 
 process.env.DATABASE_PATH = "tmp/ws2026-test.db";
+process.env.MESSAGE_BROKER_TRANSPORT = "in-memory";
 
 const { app } = await import("../dist/app.js");
 const { db, initializeDatabase, seedBooks } = await import("../dist/db/database.js");
+const { initializeMessageBroker, waitForMessageBrokerIdle } = await import(
+  "../dist/services/message-broker.js"
+);
+const { resetNotificationRecords } = await import("../dist/services/notification-service.js");
+const { initializeNotificationConsumer } = await import(
+  "../dist/services/notification-service.js"
+);
 
 initializeDatabase();
+initializeMessageBroker();
+initializeNotificationConsumer();
 
 const server = app.listen(0);
 
@@ -24,6 +34,7 @@ const baseUrl = `http://127.0.0.1:${address.port}`;
 const resetBooks = () => {
   db.exec("DELETE FROM books");
   seedBooks();
+  resetNotificationRecords();
 };
 
 const run = async (name, fn) => {
@@ -35,6 +46,24 @@ const run = async (name, fn) => {
     console.error(`FAIL ${name}`);
     throw error;
   }
+};
+
+const waitFor = async (fn, options = {}) => {
+  const timeoutMs = options.timeoutMs ?? 3000;
+  const intervalMs = options.intervalMs ?? 150;
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < timeoutMs) {
+    const result = await fn();
+
+    if (result) {
+      return result;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+
+  return null;
 };
 
 try {
@@ -87,6 +116,23 @@ try {
     assert.equal(loginResponse.status, 200);
     assert.equal(response.status, 201);
     assert.equal(body.data.title, "Testing API");
+
+    await waitForMessageBrokerIdle();
+
+    const notificationBody = await waitFor(async () => {
+      const notificationResponse = await fetch(`${baseUrl}/services/notifications/events`);
+      const candidate = await notificationResponse.json();
+
+      if (notificationResponse.status === 200 && candidate.data.length > 0) {
+        return candidate;
+      }
+
+      return null;
+    });
+
+    assert.ok(notificationBody);
+    assert.equal(notificationBody.data[0].eventType, "book.created");
+    assert.match(notificationBody.data[0].payloadSummary, /Testing API/);
   });
 
   await run("reject create tanpa auth", async () => {
@@ -168,8 +214,9 @@ try {
 
     assert.equal(response.status, 200);
     assert.equal(body.data.style, "microservice-ready modular monolith");
-    assert.equal(body.data.services.length, 2);
-    assert.equal(body.data.services[0].kind, "domain-service");
+    assert.equal(body.data.services.length, 3);
+    assert.equal(body.data.services[2].name, "notification-service");
+    assert.equal(body.data.currentState.messageBroker.transport, "in-memory");
   });
 
   await run("identity service health tersedia", async () => {
@@ -190,6 +237,24 @@ try {
     assert.equal(body.data.latestBook.id, "book-001");
   });
 
+  await run("message broker health tersedia", async () => {
+    const response = await fetch(`${baseUrl}/services/events/health`);
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.data.transport, "in-memory");
+    assert.equal(body.data.queueName, "ws2026.book.events");
+  });
+
+  await run("notification service health tersedia", async () => {
+    const response = await fetch(`${baseUrl}/services/notifications/health`);
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.service, "notification-service");
+    assert.equal(body.status, "ok");
+  });
+
   await run("openapi yaml", async () => {
     const response = await fetch(`${baseUrl}/openapi.yaml`);
     const body = await response.text();
@@ -198,6 +263,7 @@ try {
     assert.match(body, /openapi: 3.0.3/);
     assert.match(body, /\/api\/v1\/books:/);
     assert.match(body, /\/architecture\/services:/);
+    assert.match(body, /\/services\/events\/health:/);
   });
 
   console.log("All API tests passed");
