@@ -23,6 +23,16 @@ paths:
                   service:
                     type: string
                     example: ws2026-api
+  /architecture/services:
+    get:
+      summary: Lihat boundary service untuk arsitektur microservice-ready
+      responses:
+        "200":
+          description: Ringkasan gateway dan service boundary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArchitectureOverviewResponse"
   /api/v1/books:
     get:
       summary: Ambil daftar buku
@@ -174,6 +184,187 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /services/identity/health:
+    get:
+      summary: Health check untuk identity service
+      responses:
+        "200":
+          description: Identity service berjalan normal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceHealth"
+  /services/identity/login:
+    post:
+      summary: Login langsung ke identity service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Login berhasil
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          description: Request login tidak valid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Kredensial salah
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /services/catalog/health:
+    get:
+      summary: Health check untuk catalog service
+      responses:
+        "200":
+          description: Catalog service berjalan normal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceHealth"
+  /services/catalog/stats:
+    get:
+      summary: Statistik katalog buku
+      responses:
+        "200":
+          description: Statistik katalog berhasil diambil
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogStatsResponse"
+  /services/catalog/books:
+    get:
+      summary: Ambil daftar buku dari catalog service
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Daftar buku berhasil diambil
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookListResponse"
+    post:
+      summary: Tambah buku lewat catalog service
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookInput"
+      responses:
+        "201":
+          description: Buku berhasil dibuat
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookResponse"
+        "400":
+          description: Validasi gagal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /services/catalog/books/{id}:
+    get:
+      summary: Ambil detail buku dari catalog service
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Detail buku berhasil diambil
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookResponse"
+        "404":
+          description: Buku tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      summary: Ubah data buku lewat catalog service
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookInput"
+      responses:
+        "200":
+          description: Buku berhasil diperbarui
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookResponse"
+        "400":
+          description: Validasi gagal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Buku tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      summary: Hapus buku lewat catalog service
+      security:
+        - bearerAuth: []
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Buku berhasil dihapus
+        "404":
+          description: Buku tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   securitySchemes:
     bearerAuth:
@@ -266,6 +457,115 @@ components:
             - message
       required:
         - error
+    ServiceHealth:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+        service:
+          type: string
+        boundedContext:
+          type: string
+      required:
+        - status
+        - service
+        - boundedContext
+    CatalogStats:
+      type: object
+      properties:
+        totalBooks:
+          type: integer
+        latestBook:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/Book"
+      required:
+        - totalBooks
+        - latestBook
+    CatalogStatsResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/CatalogStats"
+      required:
+        - data
+    ServiceDescriptor:
+      type: object
+      properties:
+        name:
+          type: string
+        kind:
+          type: string
+          example: domain-service
+        basePath:
+          type: string
+        healthPath:
+          type: string
+        responsibilities:
+          type: array
+          items:
+            type: string
+        integrations:
+          type: array
+          items:
+            type: string
+      required:
+        - name
+        - kind
+        - basePath
+        - healthPath
+        - responsibilities
+        - integrations
+    ArchitectureOverviewResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            style:
+              type: string
+            gateway:
+              type: object
+              properties:
+                name:
+                  type: string
+                publicRoutes:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - name
+                - publicRoutes
+            services:
+              type: array
+              items:
+                $ref: "#/components/schemas/ServiceDescriptor"
+            dataFlow:
+              type: array
+              items:
+                type: string
+            currentState:
+              type: object
+              properties:
+                catalogStats:
+                  $ref: "#/components/schemas/CatalogStats"
+                identityHealth:
+                  $ref: "#/components/schemas/ServiceHealth"
+                catalogHealth:
+                  $ref: "#/components/schemas/ServiceHealth"
+              required:
+                - catalogStats
+                - identityHealth
+                - catalogHealth
+          required:
+            - style
+            - gateway
+            - services
+            - dataFlow
+            - currentState
+      required:
+        - data
     LoginInput:
       type: object
       properties:

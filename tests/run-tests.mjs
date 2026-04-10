@@ -162,6 +162,34 @@ try {
     assert.equal(body.data.title, "API Key Book");
   });
 
+  await run("architecture overview tersedia", async () => {
+    const response = await fetch(`${baseUrl}/architecture/services`);
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.data.style, "microservice-ready modular monolith");
+    assert.equal(body.data.services.length, 2);
+    assert.equal(body.data.services[0].kind, "domain-service");
+  });
+
+  await run("identity service health tersedia", async () => {
+    const response = await fetch(`${baseUrl}/services/identity/health`);
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.service, "identity-service");
+    assert.equal(body.status, "ok");
+  });
+
+  await run("catalog service stats tersedia", async () => {
+    const response = await fetch(`${baseUrl}/services/catalog/stats`);
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.data.totalBooks, 1);
+    assert.equal(body.data.latestBook.id, "book-001");
+  });
+
   await run("openapi yaml", async () => {
     const response = await fetch(`${baseUrl}/openapi.yaml`);
     const body = await response.text();
@@ -169,6 +197,7 @@ try {
     assert.equal(response.status, 200);
     assert.match(body, /openapi: 3.0.3/);
     assert.match(body, /\/api\/v1\/books:/);
+    assert.match(body, /\/architecture\/services:/);
   });
 
   console.log("All API tests passed");

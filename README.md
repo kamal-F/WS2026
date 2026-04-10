@@ -24,11 +24,11 @@ Pertemuan 8 dan 16 dikecualikan dari tag praktik karena berisi UTS dan UAS/proye
 | 7 | SOAP Web Service & WSDL | Membaca WSDL dan contoh SOAP message | `pertemuan-07` |
 | 9 | API Testing & Documentation | OpenAPI dan testing endpoint | `pertemuan-09` |
 | 10 | Authentication & Security Dasar | JWT auth, API key, CORS/rate limit konsep | `pertemuan-10` |
-| 11 | Pengantar Microservice Architecture | Pecah monolith menjadi service boundary | `pertemuan-11` |
-| 12 | Message Queue dengan RabbitMQ | Publish dan consume event | `pertemuan-12` |
-| 13 | RPC & gRPC | Call antar service dengan `.proto` | `pertemuan-13` |
-| 14 | Kafka & Event Streaming | Simulasi event log dan replay | `pertemuan-14` |
-| 15 | Integrasi Arsitektur Web Service Modern | Rancang REST + MQ + gRPC + gateway | `pertemuan-15` |
+| 11 | Pengantar Microservice Architecture | Breakdown monolith, service boundary, dan data ownership | `pertemuan-11` |
+| 12 | Message Queue dengan RabbitMQ | Asynchronous communication, producer-consumer, publish-consume event | `pertemuan-12` |
+| 13 | RPC & gRPC | REST vs RPC, `.proto`, dan gRPC service communication | `pertemuan-13` |
+| 14 | Kafka & Event Streaming | Event log, replay, dan streaming architecture | `pertemuan-14` |
+| 15 | Integrasi Arsitektur Web Service Modern | REST + MQ, REST + gRPC, API Gateway, observability | `pertemuan-15` |
 
 ## Menjalankan Project
 
@@ -40,12 +40,18 @@ npm run dev
 Endpoint awal:
 
 - `GET /health`
+- `GET /architecture/services`
 - `POST /api/v1/auth/login`
 - `GET /api/v1/books`
 - `POST /api/v1/books`
 - `GET /api/v1/books/:id`
 - `PUT /api/v1/books/:id`
 - `DELETE /api/v1/books/:id`
+- `GET /services/identity/health`
+- `POST /services/identity/login`
+- `GET /services/catalog/health`
+- `GET /services/catalog/stats`
+- `GET /services/catalog/books`
 - `GET /openapi.yaml`
 - `GET /docs`
 - `GET /soap/book-service?wsdl`
@@ -92,10 +98,23 @@ examples/
 src/
   app.ts            Konfigurasi Express
   server.ts         Entry point
+  controllers/      Handler per bounded context
+  services/         Business logic dan service boundary
   routes/           Route API
   schemas/          Validasi request
-  store/            Penyimpanan sementara
+  db/               Koneksi dan inisialisasi database
 ```
+
+## Pertemuan 11
+
+Repo sekarang masuk tahap `microservice-ready modular monolith`:
+
+- breakdown dari monolith menuju microservice boundary
+- `identity-service` untuk autentikasi dan login
+- `catalog-service` untuk katalog buku dan statistik
+- `data ownership` mulai dipisahkan per domain layanan
+- `API gateway` tetap ada di jalur `/api/v1/*`
+- endpoint `/architecture/services` dipakai untuk melihat boundary service yang sudah dipisah
 
 ## Remote GitHub
 
