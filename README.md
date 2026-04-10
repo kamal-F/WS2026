@@ -6,7 +6,7 @@ Fokus repo:
 
 - praktik bertahap untuk setiap pertemuan non-ujian,
 - REST API sebagai jalur praktik utama,
-- pengenalan SOAP, microservice, RabbitMQ, gRPC, Kafka, dan integrasi arsitektur modern,
+- pengenalan SOAP, microservice, RabbitMQ, gRPC, event streaming, dan integrasi arsitektur modern,
 - strategi tag Git per progres pertemuan untuk repo GitHub `https://github.com/kamal-F/WS2026`.
 
 ## Urutan Pertemuan
@@ -27,7 +27,7 @@ Pertemuan 8 dan 16 dikecualikan dari tag praktik karena berisi UTS dan UAS/proye
 | 11 | Pengantar Microservice Architecture | Breakdown monolith, service boundary, dan data ownership | `pertemuan-11` |
 | 12 | Message Queue dengan RabbitMQ | Asynchronous communication, producer-consumer, publish-consume event | `pertemuan-12` |
 | 13 | RPC & gRPC | REST vs RPC, `.proto`, dan gRPC service communication | `pertemuan-13` |
-| 14 | Kafka & Event Streaming | Event log, replay, dan streaming architecture | `pertemuan-14` |
+| 14 | Event Streaming | Event log, replay, dan streaming architecture | `pertemuan-14` |
 | 15 | Integrasi Arsitektur Web Service Modern | REST + MQ, REST + gRPC, API Gateway, observability | `pertemuan-15` |
 
 ## Menjalankan Project
@@ -57,6 +57,9 @@ Endpoint awal:
 - `GET /services/grpc/books/:id/summary`
 - `GET /services/notifications/health`
 - `GET /services/notifications/events`
+- `GET /services/streaming/health`
+- `GET /services/streaming/topics`
+- `GET /services/streaming/topics/:topic/replay`
 - `GET /openapi.yaml`
 - `GET /docs`
 - `GET /soap/book-service?wsdl`

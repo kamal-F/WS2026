@@ -10,6 +10,9 @@ const { db, initializeDatabase, seedBooks } = await import("../dist/db/database.
 const { initializeMessageBroker, waitForMessageBrokerIdle } = await import(
   "../dist/services/message-broker.js"
 );
+const { initializeEventStreamConsumer, resetEventStream } = await import(
+  "../dist/services/event-stream.js"
+);
 const { initializeCatalogGrpcServer, closeCatalogGrpcServer } = await import(
   "../dist/services/grpc-catalog.js"
 );
@@ -22,6 +25,7 @@ initializeDatabase();
 await initializeCatalogGrpcServer();
 initializeMessageBroker();
 initializeNotificationConsumer();
+initializeEventStreamConsumer();
 
 const server = app.listen(0);
 
@@ -41,6 +45,7 @@ const resetBooks = () => {
   db.exec("DELETE FROM books");
   seedBooks();
   resetNotificationRecords();
+  resetEventStream();
 };
 
 const run = async (name, fn) => {
@@ -139,6 +144,23 @@ try {
     assert.ok(notificationBody);
     assert.equal(notificationBody.data[0].eventType, "book.created");
     assert.match(notificationBody.data[0].payloadSummary, /Testing API/);
+
+    const replayBody = await waitFor(async () => {
+      const replayResponse = await fetch(
+        `${baseUrl}/services/streaming/topics/book-events/replay?fromOffset=0`
+      );
+      const candidate = await replayResponse.json();
+
+      if (replayResponse.status === 200 && candidate.data.records.length > 0) {
+        return candidate;
+      }
+
+      return null;
+    });
+
+    assert.ok(replayBody);
+    assert.equal(replayBody.data.records[0].eventType, "book.created");
+    assert.equal(replayBody.data.records[0].topic, "book-events");
   });
 
   await run("reject create tanpa auth", async () => {
@@ -220,11 +242,13 @@ try {
 
     assert.equal(response.status, 200);
     assert.equal(body.data.style, "microservice-ready modular monolith");
-    assert.equal(body.data.services.length, 4);
+    assert.equal(body.data.services.length, 5);
     assert.equal(body.data.services[2].name, "notification-service");
     assert.equal(body.data.services[3].name, "catalog-rpc");
+    assert.equal(body.data.services[4].name, "event-stream-service");
     assert.equal(body.data.currentState.messageBroker.transport, "in-memory");
     assert.equal(body.data.currentState.grpcHealth.service, "catalog-rpc");
+    assert.equal(body.data.currentState.streamHealth.service, "event-stream-service");
   });
 
   await run("identity service health tersedia", async () => {
@@ -272,6 +296,55 @@ try {
     assert.equal(body.data.port, Number(grpcTestPort));
   });
 
+  await run("streaming health tersedia", async () => {
+    const response = await fetch(`${baseUrl}/services/streaming/health`);
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.data.service, "event-stream-service");
+    assert.equal(body.data.mode, "kafka-style append-only log");
+  });
+
+  await run("stream topics dan replay tersedia", async () => {
+    const createResponse = await fetch(`${baseUrl}/api/v1/books`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "ws2026-api-key"
+      },
+      body: JSON.stringify({
+        title: "Streaming Book",
+        author: "Kamal",
+        year: 2026
+      })
+    });
+
+    assert.equal(createResponse.status, 201);
+
+    const topicsBody = await waitFor(async () => {
+      const topicsResponse = await fetch(`${baseUrl}/services/streaming/topics`);
+      const candidate = await topicsResponse.json();
+
+      if (topicsResponse.status === 200 && candidate.data.length > 0) {
+        return candidate;
+      }
+
+      return null;
+    });
+
+    assert.ok(topicsBody);
+    assert.equal(topicsBody.data[0].topic, "book-events");
+
+    const replayResponse = await fetch(
+      `${baseUrl}/services/streaming/topics/book-events/replay?fromOffset=0`
+    );
+    const replayBody = await replayResponse.json();
+
+    assert.equal(replayResponse.status, 200);
+    assert.ok(replayBody.data.records.length >= 1);
+    assert.equal(replayBody.data.records[0].topic, "book-events");
+  });
+
   await run("rest gateway dapat memanggil grpc", async () => {
     const response = await fetch(`${baseUrl}/services/grpc/books/book-001/summary`);
     const body = await response.json();
@@ -292,6 +365,7 @@ try {
     assert.match(body, /\/architecture\/services:/);
     assert.match(body, /\/services\/events\/health:/);
     assert.match(body, /\/services\/grpc\/health:/);
+    assert.match(body, /\/services\/streaming\/health:/);
   });
 
   console.log("All API tests passed");

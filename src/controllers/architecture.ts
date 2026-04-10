@@ -17,11 +17,15 @@ import {
   getCatalogGrpcDescriptor,
   getCatalogGrpcHealth
 } from "../services/grpc-catalog.js";
+import {
+  getEventStreamDescriptor,
+  getEventStreamHealth
+} from "../services/event-stream.js";
 import type { SuccessBody } from "../types/api.js";
 
 type ServiceOverview = {
   name: string;
-  kind: "domain-service" | "rpc-service";
+  kind: "domain-service" | "rpc-service" | "stream-service";
   basePath: string;
   healthPath: string;
   responsibilities: string[];
@@ -43,6 +47,7 @@ type ArchitectureOverview = {
     notificationHealth: ReturnType<typeof getNotificationServiceHealth>;
     messageBroker: ReturnType<typeof getMessageBrokerHealth>;
     grpcHealth: ReturnType<typeof getCatalogGrpcHealth>;
+    streamHealth: ReturnType<typeof getEventStreamHealth>;
   };
 };
 
@@ -61,7 +66,8 @@ export const getArchitectureOverview = (
         getIdentityServiceDescriptor(),
         getCatalogServiceDescriptor(),
         getNotificationServiceDescriptor(),
-        getCatalogGrpcDescriptor()
+        getCatalogGrpcDescriptor(),
+        getEventStreamDescriptor()
       ],
       dataFlow: [
         "Client mengakses gateway pada path /api/v1/*",
@@ -69,6 +75,8 @@ export const getArchitectureOverview = (
         "Catalog service mengelola data buku dan mem-publish event book.created",
         "Message broker meneruskan event ke consumer",
         "Notification service mengonsumsi event book.created secara asynchronous",
+        "Event stream service menyimpan event ke append-only log bertopik book-events",
+        "Client dapat melakukan replay dari offset tertentu seperti konsep Kafka",
         "REST gateway juga dapat memanggil catalog-rpc lewat gRPC unary call",
         "Identity service menangani login, token, dan validasi kredensial"
       ],
@@ -78,7 +86,8 @@ export const getArchitectureOverview = (
         catalogHealth: getCatalogServiceHealth(),
         notificationHealth: getNotificationServiceHealth(),
         messageBroker: getMessageBrokerHealth(),
-        grpcHealth: getCatalogGrpcHealth()
+        grpcHealth: getCatalogGrpcHealth(),
+        streamHealth: getEventStreamHealth()
       }
     }
   });

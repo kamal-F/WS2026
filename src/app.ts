@@ -13,6 +13,7 @@ import { healthRouter } from "./routes/health.js";
 import { identityServiceRouter } from "./routes/identity-service.js";
 import { openApiRouter } from "./routes/openapi.js";
 import { soapRouter } from "./routes/soap.js";
+import { streamingRouter } from "./routes/streaming.js";
 
 export const app = express();
 
@@ -43,6 +44,7 @@ app.use("/services/grpc", grpcRouter);
 app.use("/services/identity", identityServiceRouter);
 app.use("/services/catalog", catalogServiceRouter);
 app.use("/services/notifications", notificationsRouter);
+app.use("/services/streaming", streamingRouter);
 app.use("/soap", soapRouter);
 
 app.use((error: Error, _req: Request, res: Response, next: NextFunction) => {

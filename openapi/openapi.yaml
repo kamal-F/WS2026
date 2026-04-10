@@ -284,6 +284,47 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /services/streaming/health:
+    get:
+      summary: Health check untuk event streaming service
+      responses:
+        "200":
+          description: Status event streaming service
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StreamHealthResponse"
+  /services/streaming/topics:
+    get:
+      summary: Lihat daftar topic pada append-only event log
+      responses:
+        "200":
+          description: Daftar topic stream
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StreamTopicListResponse"
+  /services/streaming/topics/{topic}/replay:
+    get:
+      summary: Replay event dari topic tertentu berdasarkan offset
+      parameters:
+        - in: path
+          name: topic
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: fromOffset
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Replay event berhasil diambil
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StreamReplayResponse"
   /services/catalog/books:
     get:
       summary: Ambil daftar buku dari catalog service
@@ -622,6 +663,8 @@ components:
                   $ref: "#/components/schemas/MessageBrokerHealth"
                 grpcHealth:
                   $ref: "#/components/schemas/GrpcHealth"
+                streamHealth:
+                  $ref: "#/components/schemas/StreamHealth"
               required:
                 - catalogStats
                 - identityHealth
@@ -629,6 +672,7 @@ components:
                 - notificationHealth
                 - messageBroker
                 - grpcHealth
+                - streamHealth
           required:
             - style
             - gateway
@@ -692,6 +736,116 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/BookSummary"
+      required:
+        - data
+    StreamHealth:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+        service:
+          type: string
+        boundedContext:
+          type: string
+        mode:
+          type: string
+        totalTopics:
+          type: integer
+        totalRecords:
+          type: integer
+        nextOffset:
+          type: integer
+      required:
+        - status
+        - service
+        - boundedContext
+        - mode
+        - totalTopics
+        - totalRecords
+        - nextOffset
+    StreamHealthResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/StreamHealth"
+      required:
+        - data
+    StreamTopic:
+      type: object
+      properties:
+        topic:
+          type: string
+        records:
+          type: integer
+        latestOffset:
+          nullable: true
+          type: integer
+      required:
+        - topic
+        - records
+        - latestOffset
+    StreamTopicListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/StreamTopic"
+      required:
+        - data
+    StreamRecord:
+      type: object
+      properties:
+        offset:
+          type: integer
+        topic:
+          type: string
+        key:
+          type: string
+        eventId:
+          type: string
+        eventType:
+          type: string
+        source:
+          type: string
+        appendedAt:
+          type: string
+          format: date-time
+        payload:
+          type: object
+      required:
+        - offset
+        - topic
+        - key
+        - eventId
+        - eventType
+        - source
+        - appendedAt
+        - payload
+    StreamReplay:
+      type: object
+      properties:
+        topic:
+          type: string
+        fromOffset:
+          type: integer
+        nextOffset:
+          type: integer
+        records:
+          type: array
+          items:
+            $ref: "#/components/schemas/StreamRecord"
+      required:
+        - topic
+        - fromOffset
+        - nextOffset
+        - records
+    StreamReplayResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/StreamReplay"
       required:
         - data
     MessageBrokerHealth:

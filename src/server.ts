@@ -1,5 +1,6 @@
 import { config } from "dotenv";
 import { initializeDatabase } from "./db/database.js";
+import { initializeEventStreamConsumer } from "./services/event-stream.js";
 import { initializeCatalogGrpcServer } from "./services/grpc-catalog.js";
 import { initializeMessageBroker } from "./services/message-broker.js";
 import { initializeNotificationConsumer } from "./services/notification-service.js";
@@ -9,6 +10,7 @@ initializeDatabase();
 await initializeCatalogGrpcServer();
 initializeMessageBroker();
 initializeNotificationConsumer();
+initializeEventStreamConsumer();
 
 const { app } = await import("./app.js");
 
