@@ -47,6 +47,7 @@ Endpoint awal:
 - `GET /api/v1/books/:id`
 - `PUT /api/v1/books/:id`
 - `DELETE /api/v1/books/:id`
+- `GET /api/v1/integration/books/:id/overview`
 - `GET /services/identity/health`
 - `POST /services/identity/login`
 - `GET /services/catalog/health`
@@ -57,6 +58,8 @@ Endpoint awal:
 - `GET /services/grpc/books/:id/summary`
 - `GET /services/notifications/health`
 - `GET /services/notifications/events`
+- `GET /services/observability/health`
+- `GET /services/observability/logs`
 - `GET /services/streaming/health`
 - `GET /services/streaming/topics`
 - `GET /services/streaming/topics/:topic/replay`

@@ -21,11 +21,19 @@ import {
   getEventStreamDescriptor,
   getEventStreamHealth
 } from "../services/event-stream.js";
+import {
+  getObservabilityDescriptor,
+  getObservabilityHealth
+} from "../services/observability.js";
 import type { SuccessBody } from "../types/api.js";
 
 type ServiceOverview = {
   name: string;
-  kind: "domain-service" | "rpc-service" | "stream-service";
+  kind:
+    | "domain-service"
+    | "rpc-service"
+    | "stream-service"
+    | "observability-service";
   basePath: string;
   healthPath: string;
   responsibilities: string[];
@@ -48,6 +56,7 @@ type ArchitectureOverview = {
     messageBroker: ReturnType<typeof getMessageBrokerHealth>;
     grpcHealth: ReturnType<typeof getCatalogGrpcHealth>;
     streamHealth: ReturnType<typeof getEventStreamHealth>;
+    observabilityHealth: ReturnType<typeof getObservabilityHealth>;
   };
 };
 
@@ -67,18 +76,21 @@ export const getArchitectureOverview = (
         getCatalogServiceDescriptor(),
         getNotificationServiceDescriptor(),
         getCatalogGrpcDescriptor(),
-        getEventStreamDescriptor()
+        getEventStreamDescriptor(),
+        getObservabilityDescriptor()
       ],
       dataFlow: [
         "Client mengakses gateway pada path /api/v1/*",
         "Gateway meneruskan request ke boundary identity atau catalog",
+        "Gateway integration endpoint dapat menggabungkan hasil REST, gRPC, dan event streaming",
         "Catalog service mengelola data buku dan mem-publish event book.created",
         "Message broker meneruskan event ke consumer",
         "Notification service mengonsumsi event book.created secara asynchronous",
         "Event stream service menyimpan event ke append-only log bertopik book-events",
         "Client dapat melakukan replay dari offset tertentu seperti konsep Kafka",
         "REST gateway juga dapat memanggil catalog-rpc lewat gRPC unary call",
-        "Identity service menangani login, token, dan validasi kredensial"
+        "Identity service menangani login, token, dan validasi kredensial",
+        "Observability service menyimpan log request gateway"
       ],
       currentState: {
         catalogStats: getCatalogServiceStats(),
@@ -87,7 +99,8 @@ export const getArchitectureOverview = (
         notificationHealth: getNotificationServiceHealth(),
         messageBroker: getMessageBrokerHealth(),
         grpcHealth: getCatalogGrpcHealth(),
-        streamHealth: getEventStreamHealth()
+        streamHealth: getEventStreamHealth(),
+        observabilityHealth: getObservabilityHealth()
       }
     }
   });

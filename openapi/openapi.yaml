@@ -100,6 +100,28 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/integration/books/{id}/overview:
+    get:
+      summary: Ambil overview integrasi arsitektur untuk satu buku
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Overview integrasi berhasil diambil
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IntegratedBookOverviewResponse"
+        "404":
+          description: Buku tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
     put:
       summary: Ubah data buku
       security:
@@ -468,6 +490,26 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/NotificationEventListResponse"
+  /services/observability/health:
+    get:
+      summary: Health check untuk observability service
+      responses:
+        "200":
+          description: Status observability service
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ObservabilityHealthResponse"
+  /services/observability/logs:
+    get:
+      summary: Lihat log request gateway
+      responses:
+        "200":
+          description: Daftar log request gateway
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RequestLogListResponse"
 components:
   securitySchemes:
     bearerAuth:
@@ -665,6 +707,8 @@ components:
                   $ref: "#/components/schemas/GrpcHealth"
                 streamHealth:
                   $ref: "#/components/schemas/StreamHealth"
+                observabilityHealth:
+                  $ref: "#/components/schemas/ObservabilityHealth"
               required:
                 - catalogStats
                 - identityHealth
@@ -673,6 +717,7 @@ components:
                 - messageBroker
                 - grpcHealth
                 - streamHealth
+                - observabilityHealth
           required:
             - style
             - gateway
@@ -846,6 +891,102 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/StreamReplay"
+      required:
+        - data
+    ObservabilityHealth:
+      type: object
+      properties:
+        status:
+          type: string
+        service:
+          type: string
+        boundedContext:
+          type: string
+        totalLogs:
+          type: integer
+      required:
+        - status
+        - service
+        - boundedContext
+        - totalLogs
+    ObservabilityHealthResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/ObservabilityHealth"
+      required:
+        - data
+    RequestLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        method:
+          type: string
+        path:
+          type: string
+        statusCode:
+          type: integer
+        durationMs:
+          type: integer
+        recordedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - method
+        - path
+        - statusCode
+        - durationMs
+        - recordedAt
+    RequestLogListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/RequestLog"
+      required:
+        - data
+    IntegratedBookOverview:
+      type: object
+      properties:
+        gateway:
+          type: string
+        bookId:
+          type: string
+        restView:
+          $ref: "#/components/schemas/Book"
+        rpcView:
+          $ref: "#/components/schemas/BookSummary"
+        streamView:
+          type: object
+          properties:
+            topic:
+              type: string
+            records:
+              type: array
+              items:
+                $ref: "#/components/schemas/StreamRecord"
+          required:
+            - topic
+            - records
+        notifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/NotificationEvent"
+      required:
+        - gateway
+        - bookId
+        - restView
+        - rpcView
+        - streamView
+        - notifications
+    IntegratedBookOverviewResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/IntegratedBookOverview"
       required:
         - data
     MessageBrokerHealth:

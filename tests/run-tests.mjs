@@ -16,6 +16,7 @@ const { initializeEventStreamConsumer, resetEventStream } = await import(
 const { initializeCatalogGrpcServer, closeCatalogGrpcServer } = await import(
   "../dist/services/grpc-catalog.js"
 );
+const { resetRequestLogs } = await import("../dist/services/observability.js");
 const { resetNotificationRecords } = await import("../dist/services/notification-service.js");
 const { initializeNotificationConsumer } = await import(
   "../dist/services/notification-service.js"
@@ -46,6 +47,7 @@ const resetBooks = () => {
   seedBooks();
   resetNotificationRecords();
   resetEventStream();
+  resetRequestLogs();
 };
 
 const run = async (name, fn) => {
@@ -242,13 +244,15 @@ try {
 
     assert.equal(response.status, 200);
     assert.equal(body.data.style, "microservice-ready modular monolith");
-    assert.equal(body.data.services.length, 5);
+    assert.equal(body.data.services.length, 6);
     assert.equal(body.data.services[2].name, "notification-service");
     assert.equal(body.data.services[3].name, "catalog-rpc");
     assert.equal(body.data.services[4].name, "event-stream-service");
+    assert.equal(body.data.services[5].name, "gateway-observability");
     assert.equal(body.data.currentState.messageBroker.transport, "in-memory");
     assert.equal(body.data.currentState.grpcHealth.service, "catalog-rpc");
     assert.equal(body.data.currentState.streamHealth.service, "event-stream-service");
+    assert.equal(body.data.currentState.observabilityHealth.service, "gateway-observability");
   });
 
   await run("identity service health tersedia", async () => {
@@ -345,6 +349,58 @@ try {
     assert.equal(replayBody.data.records[0].topic, "book-events");
   });
 
+  await run("integration overview menggabungkan rest grpc dan stream", async () => {
+    const createResponse = await fetch(`${baseUrl}/api/v1/books`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "ws2026-api-key"
+      },
+      body: JSON.stringify({
+        title: "Integrated Book",
+        author: "Kamal",
+        year: 2026
+      })
+    });
+
+    const createdBody = await createResponse.json();
+    assert.equal(createResponse.status, 201);
+
+    const overviewBody = await waitFor(async () => {
+      const overviewResponse = await fetch(
+        `${baseUrl}/api/v1/integration/books/${createdBody.data.id}/overview`
+      );
+      const candidate = await overviewResponse.json();
+
+      if (overviewResponse.status === 200 && candidate.data.streamView.records.length > 0) {
+        return candidate;
+      }
+
+      return null;
+    });
+
+    assert.ok(overviewBody);
+    assert.equal(overviewBody.data.gateway, "ws2026-api-gateway");
+    assert.equal(overviewBody.data.restView.id, createdBody.data.id);
+    assert.equal(overviewBody.data.rpcView.servedBy, "catalog-rpc");
+    assert.equal(overviewBody.data.streamView.topic, "book-events");
+  });
+
+  await run("observability health dan logs tersedia", async () => {
+    const healthResponse = await fetch(`${baseUrl}/services/observability/health`);
+    const healthBody = await healthResponse.json();
+
+    assert.equal(healthResponse.status, 200);
+    assert.equal(healthBody.data.service, "gateway-observability");
+
+    const logsResponse = await fetch(`${baseUrl}/services/observability/logs`);
+    const logsBody = await logsResponse.json();
+
+    assert.equal(logsResponse.status, 200);
+    assert.ok(logsBody.data.length >= 1);
+    assert.equal(typeof logsBody.data[0].durationMs, "number");
+  });
+
   await run("rest gateway dapat memanggil grpc", async () => {
     const response = await fetch(`${baseUrl}/services/grpc/books/book-001/summary`);
     const body = await response.json();
@@ -366,6 +422,8 @@ try {
     assert.match(body, /\/services\/events\/health:/);
     assert.match(body, /\/services\/grpc\/health:/);
     assert.match(body, /\/services\/streaming\/health:/);
+    assert.match(body, /\/api\/v1\/integration\/books\/\{id\}\/overview:/);
+    assert.match(body, /\/services\/observability\/health:/);
   });
 
   console.log("All API tests passed");
