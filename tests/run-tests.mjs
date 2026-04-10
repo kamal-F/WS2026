@@ -2,11 +2,16 @@ import assert from "node:assert/strict";
 
 process.env.DATABASE_PATH = "tmp/ws2026-test.db";
 process.env.MESSAGE_BROKER_TRANSPORT = "in-memory";
+const grpcTestPort = String(55000 + Math.floor(Math.random() * 1000));
+process.env.GRPC_PORT = grpcTestPort;
 
 const { app } = await import("../dist/app.js");
 const { db, initializeDatabase, seedBooks } = await import("../dist/db/database.js");
 const { initializeMessageBroker, waitForMessageBrokerIdle } = await import(
   "../dist/services/message-broker.js"
+);
+const { initializeCatalogGrpcServer, closeCatalogGrpcServer } = await import(
+  "../dist/services/grpc-catalog.js"
 );
 const { resetNotificationRecords } = await import("../dist/services/notification-service.js");
 const { initializeNotificationConsumer } = await import(
@@ -14,6 +19,7 @@ const { initializeNotificationConsumer } = await import(
 );
 
 initializeDatabase();
+await initializeCatalogGrpcServer();
 initializeMessageBroker();
 initializeNotificationConsumer();
 
@@ -214,9 +220,11 @@ try {
 
     assert.equal(response.status, 200);
     assert.equal(body.data.style, "microservice-ready modular monolith");
-    assert.equal(body.data.services.length, 3);
+    assert.equal(body.data.services.length, 4);
     assert.equal(body.data.services[2].name, "notification-service");
+    assert.equal(body.data.services[3].name, "catalog-rpc");
     assert.equal(body.data.currentState.messageBroker.transport, "in-memory");
+    assert.equal(body.data.currentState.grpcHealth.service, "catalog-rpc");
   });
 
   await run("identity service health tersedia", async () => {
@@ -255,6 +263,25 @@ try {
     assert.equal(body.status, "ok");
   });
 
+  await run("grpc health tersedia", async () => {
+    const response = await fetch(`${baseUrl}/services/grpc/health`);
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.data.service, "catalog-rpc");
+    assert.equal(body.data.port, Number(grpcTestPort));
+  });
+
+  await run("rest gateway dapat memanggil grpc", async () => {
+    const response = await fetch(`${baseUrl}/services/grpc/books/book-001/summary`);
+    const body = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(body.data.id, "book-001");
+    assert.equal(body.data.servedBy, "catalog-rpc");
+    assert.match(body.data.summary, /Web Service Fundamentals/);
+  });
+
   await run("openapi yaml", async () => {
     const response = await fetch(`${baseUrl}/openapi.yaml`);
     const body = await response.text();
@@ -264,6 +291,7 @@ try {
     assert.match(body, /\/api\/v1\/books:/);
     assert.match(body, /\/architecture\/services:/);
     assert.match(body, /\/services\/events\/health:/);
+    assert.match(body, /\/services\/grpc\/health:/);
   });
 
   console.log("All API tests passed");
@@ -278,4 +306,5 @@ try {
       resolve();
     });
   });
+  await closeCatalogGrpcServer();
 }

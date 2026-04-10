@@ -252,6 +252,38 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MessageBrokerHealthResponse"
+  /services/grpc/health:
+    get:
+      summary: Health check untuk catalog RPC service
+      responses:
+        "200":
+          description: Status gRPC server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GrpcHealthResponse"
+  /services/grpc/books/{id}/summary:
+    get:
+      summary: Ambil ringkasan buku lewat gRPC call
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ringkasan buku berhasil diambil lewat gRPC
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookSummaryResponse"
+        "404":
+          description: Buku tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /services/catalog/books:
     get:
       summary: Ambil daftar buku dari catalog service
@@ -588,18 +620,78 @@ components:
                   $ref: "#/components/schemas/ServiceHealth"
                 messageBroker:
                   $ref: "#/components/schemas/MessageBrokerHealth"
+                grpcHealth:
+                  $ref: "#/components/schemas/GrpcHealth"
               required:
                 - catalogStats
                 - identityHealth
                 - catalogHealth
                 - notificationHealth
                 - messageBroker
+                - grpcHealth
           required:
             - style
             - gateway
             - services
             - dataFlow
             - currentState
+      required:
+        - data
+    GrpcHealth:
+      type: object
+      properties:
+        status:
+          type: string
+          example: listening
+        port:
+          type: integer
+        service:
+          type: string
+        protoPath:
+          type: string
+      required:
+        - status
+        - port
+        - service
+        - protoPath
+    GrpcHealthResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/GrpcHealth"
+      required:
+        - data
+    BookSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        author:
+          type: string
+        year:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        summary:
+          type: string
+        servedBy:
+          type: string
+      required:
+        - id
+        - title
+        - author
+        - year
+        - createdAt
+        - summary
+        - servedBy
+    BookSummaryResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/BookSummary"
       required:
         - data
     MessageBrokerHealth:

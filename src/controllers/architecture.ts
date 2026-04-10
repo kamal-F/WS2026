@@ -13,11 +13,15 @@ import {
   getNotificationServiceDescriptor,
   getNotificationServiceHealth
 } from "../services/notification-service.js";
+import {
+  getCatalogGrpcDescriptor,
+  getCatalogGrpcHealth
+} from "../services/grpc-catalog.js";
 import type { SuccessBody } from "../types/api.js";
 
 type ServiceOverview = {
   name: string;
-  kind: "domain-service";
+  kind: "domain-service" | "rpc-service";
   basePath: string;
   healthPath: string;
   responsibilities: string[];
@@ -38,6 +42,7 @@ type ArchitectureOverview = {
     catalogHealth: ReturnType<typeof getCatalogServiceHealth>;
     notificationHealth: ReturnType<typeof getNotificationServiceHealth>;
     messageBroker: ReturnType<typeof getMessageBrokerHealth>;
+    grpcHealth: ReturnType<typeof getCatalogGrpcHealth>;
   };
 };
 
@@ -55,7 +60,8 @@ export const getArchitectureOverview = (
       services: [
         getIdentityServiceDescriptor(),
         getCatalogServiceDescriptor(),
-        getNotificationServiceDescriptor()
+        getNotificationServiceDescriptor(),
+        getCatalogGrpcDescriptor()
       ],
       dataFlow: [
         "Client mengakses gateway pada path /api/v1/*",
@@ -63,6 +69,7 @@ export const getArchitectureOverview = (
         "Catalog service mengelola data buku dan mem-publish event book.created",
         "Message broker meneruskan event ke consumer",
         "Notification service mengonsumsi event book.created secara asynchronous",
+        "REST gateway juga dapat memanggil catalog-rpc lewat gRPC unary call",
         "Identity service menangani login, token, dan validasi kredensial"
       ],
       currentState: {
@@ -70,7 +77,8 @@ export const getArchitectureOverview = (
         identityHealth: getIdentityServiceHealth(),
         catalogHealth: getCatalogServiceHealth(),
         notificationHealth: getNotificationServiceHealth(),
-        messageBroker: getMessageBrokerHealth()
+        messageBroker: getMessageBrokerHealth(),
+        grpcHealth: getCatalogGrpcHealth()
       }
     }
   });

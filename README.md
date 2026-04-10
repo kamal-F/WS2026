@@ -53,6 +53,8 @@ Endpoint awal:
 - `GET /services/catalog/stats`
 - `GET /services/catalog/books`
 - `GET /services/events/health`
+- `GET /services/grpc/health`
+- `GET /services/grpc/books/:id/summary`
 - `GET /services/notifications/health`
 - `GET /services/notifications/events`
 - `GET /openapi.yaml`

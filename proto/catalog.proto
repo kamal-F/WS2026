@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package ws2026.catalog.v1;
+
+service CatalogRpc {
+  rpc GetBookSummary(GetBookRequest) returns (BookSummaryReply);
+}
+
+message GetBookRequest {
+  string id = 1;
+}
+
+message BookSummaryReply {
+  string id = 1;
+  string title = 2;
+  string author = 3;
+  int32 year = 4;
+  string createdAt = 5;
+  string summary = 6;
+  string servedBy = 7;
+}
