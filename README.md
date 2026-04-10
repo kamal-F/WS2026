@@ -7,13 +7,13 @@ Fokus repo:
 - praktik bertahap untuk setiap pertemuan non-ujian,
 - REST API sebagai jalur praktik utama,
 - pengenalan SOAP, microservice, RabbitMQ, gRPC, event streaming, dan integrasi arsitektur modern,
-- strategi tag Git per progres pertemuan untuk repo GitHub `https://github.com/kamal-F/WS2026`.
+- dokumentasi progres materi dan praktik per pertemuan untuk repo GitHub `https://github.com/kamal-F/WS2026`.
 
 ## Urutan Pertemuan
 
-Pertemuan 8 dan 16 dikecualikan dari tag praktik karena berisi UTS dan UAS/proyek.
+Pertemuan 8 dan 16 tidak dimasukkan ke alur praktik rutin karena berisi UTS dan UAS/proyek.
 
-| Pertemuan | Topik | Praktik | Tag yang Disarankan |
+| Pertemuan | Topik | Praktik | Penanda Progres |
 |---:|---|---|---|
 | 1 | Pengantar Web Service & Sistem Terdistribusi | Peta client-server dan jenis komunikasi | `pertemuan-01` |
 | 2 | HTTP & RESTful Principles | Eksperimen HTTP method dan status code | `pertemuan-02` |
